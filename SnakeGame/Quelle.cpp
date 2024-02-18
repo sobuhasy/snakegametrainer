@@ -1,6 +1,9 @@
 #include <iostream>
 #include <conio.h>
 #include <windows.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+namespace py = pybind11;
 using namespace std;
 bool gameOver;
 const int width = 20;
@@ -58,7 +61,7 @@ void Draw(){
 	cout << "Score:" << score << endl;
 }
 void Input(){
-	if (_kbhit()){
+	/* if (_kbhit()){
 		switch (_getch()){
 		case 'a':
 			dir = LEFT;
@@ -76,6 +79,30 @@ void Input(){
 			gameOver = true;
 			break;
 		}
+		*/
+	py::scoped_interpreter guard{};
+	py::module snake_ai = py::module::import("snake_ai");
+	py::function get_action = snake_ai.attr("get_action");
+
+	std::vector<float> state = {x, y, fruitX, fruitY};
+	int action = get_action(state).cast<int>();
+
+	switch(action){
+		case 0:
+			dir = LEFT;
+			break;
+		case 1:
+			dir = RIGHT;
+			break;
+		case 2:
+			dir = UP;
+			break;
+		case 3:
+			dir = DOWN;
+			break;
+		default:
+			dir = STOP;
+			break;
 	}
 }
 void Logic(){
